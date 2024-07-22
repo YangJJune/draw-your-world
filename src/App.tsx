@@ -4,7 +4,6 @@ import "./App.css";
 import { useState, useEffect } from "react";
 
 let mapInstance: naver.maps.Map;
-
 function App() {
   const loadScript = (src: string, callback: () => void) => {
     console.log("나 왔음");
@@ -46,9 +45,28 @@ function App() {
     } else {
       initMap();
     }
-    naver.maps.Event.addListener(mapInstance, "click", function (e) {
-      console.log(e.coord.x);
-      console.log(e.coord.y);
+    var map = new naver.maps.Map("map", {
+      center: new naver.maps.LatLng(37.3700065, 127.121359),
+      zoom: 14,
+    });
+
+    var polyline = new naver.maps.Polyline({
+      map: map,
+      path: [],
+      strokeColor: "#5347AA",
+      strokeWeight: 2,
+    });
+
+    naver.maps.Event.addListener(map, "click", function (e) {
+      var point = e.coord;
+
+      var path = polyline.getPath();
+      path.push(point);
+
+      new naver.maps.Marker({
+        map: map,
+        position: point,
+      });
     });
   }, [,]);
 
