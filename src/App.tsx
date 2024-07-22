@@ -4,6 +4,7 @@ import "./App.css";
 import { useState, useEffect } from "react";
 
 let mapInstance: naver.maps.Map;
+let arr: naver.maps.Marker[] = [];
 function App() {
   const loadScript = (src: string, callback: () => void) => {
     console.log("나 왔음");
@@ -14,6 +15,7 @@ function App() {
     document.head.appendChild(script);
   };
 
+  const [coord, setCoord] = useState<string[]>([]);
   const [isMapLoaded, setMapLoaded] = useState(false);
 
   const initMap = () => {
@@ -62,18 +64,39 @@ function App() {
 
       var path = polyline.getPath();
       path.push(point);
+      setCoord((oldCoord) => [
+        ...oldCoord,
+        "(" + (point.x.toString() + "," + point.y.toString() + ")"),
+      ]);
+      arr.push(
+        new naver.maps.Marker({
+          map: map,
+          position: point,
+        })
+      );
+    });
 
-      new naver.maps.Marker({
-        map: map,
-        position: point,
-      });
+    naver.maps.Event.addListener(map, "rightclick", function (e) {
+      var path = polyline.getPath();
+      try {
+        path.pop();
+        arr.pop()?.setVisible(false);
+
+        setCoord((e) => e.slice(0, e.length - 1));
+      } catch (error) {
+        console.log(error);
+        window.alert(
+          "Array size is under 0! If this error occurs again, please refresh page."
+        );
+      }
     });
   }, [,]);
 
   return (
-    <>
+    <div id="container">
       <div id="map"></div>
-    </>
+      <textarea id="txt" rows={8} cols={28} value={coord}></textarea>
+    </div>
   );
 }
 
